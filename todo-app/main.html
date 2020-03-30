@@ -7,14 +7,15 @@
     <script>
         const electron = require("electron");
         const {ipcRenderer} = electron;
+        const list = document.querySelector("ul");
         ipcRenderer.on("todo:add",(event, todo)=>{
             const li = document.createElement("li");
             const text = document.createTextNode(todo);
             li.appendChild(text);
-            document.querySelector("ul").append(li);
+            list.append(li);
         });
         ipcRenderer.on("todo:clearAll",(event)=>{
-            document.querySelector("ul").innerHTML="";
+            list.innerHTML="";
         })
     </script>
 </body>
