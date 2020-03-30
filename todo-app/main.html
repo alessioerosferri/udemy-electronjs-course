@@ -13,7 +13,7 @@
             li.appendChild(text);
             document.querySelector("ul").append(li);
         });
-        ipcRenderer.on("todo:clearAll",(event, todo)=>{
+        ipcRenderer.on("todo:clearAll",(event)=>{
             document.querySelector("ul").innerHTML="";
         })
     </script>
