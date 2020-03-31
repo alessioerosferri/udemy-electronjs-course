@@ -10,7 +10,7 @@ let tray;
 app.on("ready", () => {
   app.dock.hide();
   mainWindow = new MainWindow({
-    webPreferences: {nodeIntegration: true},
+    webPreferences: {nodeIntegration: true, backgroundThrottling: false},
     height: 500,
     width: 300,
     frame: false,
