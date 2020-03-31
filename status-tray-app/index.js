@@ -7,6 +7,7 @@ let mainWindow;
 let tray;
 
 app.on("ready", () => {
+  app.dock.hide();
   mainWindow = new BrowserWindow({
     webPreferences: {nodeIntegration: true},
     height: 500,
