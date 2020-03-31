@@ -4,6 +4,7 @@ const {app, BrowserWindow} = electron;
 const TimeTray = require("./app/TimerTray");
 
 let mainWindow;
+let tray;
 
 app.on("ready", () => {
   mainWindow = new BrowserWindow({
@@ -18,5 +19,5 @@ app.on("ready", () => {
 
   const iconName = process.platform === "darwin" ? "iconTemplate.png" : "windows-icon@2x.png";
 
-  new TimeTray(path.join(__dirname, "src", "assets", iconName), mainWindow);
+  tray = new TimeTray(path.join(__dirname, "src", "assets", iconName), mainWindow);
 });
