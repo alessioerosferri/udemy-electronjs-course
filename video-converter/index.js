@@ -39,7 +39,7 @@ ipcMain.on("videos:add", (event, videos) => {
 });
 
 ipcMain.on("videos:convert", ((event, videos) => {
-  _.each(videos, (video)=>{
+  _.each(videos, (video) => {
     console.log("video", video)
     const outputDir = video.path.split(video.name)[0];
     const outputName = video.name.split(".")[0];
@@ -47,7 +47,10 @@ ipcMain.on("videos:convert", ((event, videos) => {
 
     ffmpeg(video.path)
       .output(outputPath)
-      .on("end", ()=>{
+      .on("progress", ({timemark}) => {
+        mainWindow.webContents.send("conversion:progress", {video, timemark});
+      })
+      .on("end", () => {
         mainWindow.webContents.send("video:converted", {video, outputPath})
       })
       .run();
