@@ -1,5 +1,7 @@
-import { ADD_VIDEO, ADD_VIDEOS, REMOVE_VIDEO, REMOVE_ALL_VIDEOS, VIDEO_PROGRESS, VIDEO_COMPLETE } from "./types";
+import {ADD_VIDEO, ADD_VIDEOS, REMOVE_VIDEO, REMOVE_ALL_VIDEOS, VIDEO_PROGRESS, VIDEO_COMPLETE} from "./types";
 import {ipcRenderer} from "electron";
+import _ from "lodash";
+let listenerHasBeenSet;
 
 export const addVideos = videos => dispatch => {
   ipcRenderer.send("videos:add", videos);
@@ -10,12 +12,16 @@ export const addVideos = videos => dispatch => {
 };
 
 
-// TODO: Communicate to MainWindow that the user wants
-// to start converting videos.  Also listen for feedback
-// from the MainWindow regarding the current state of
-// conversion.
 export const convertVideos = () => (dispatch, getState) => {
+  const {videos} = getState();
 
+  ipcRenderer.send("videos:convert", videos);
+  if (!listenerHasBeenSet){
+    listenerHasBeenSet = true;
+    ipcRenderer.on("video:converted", (event, {video, outputPath}) => {
+      dispatch({type: VIDEO_COMPLETE, payload: {...video, outputPath}});
+    });
+  }
 };
 
 // TODO: Open the folder that the newly created video
@@ -27,14 +33,14 @@ export const showInFolder = outputPath => dispatch => {
 export const addVideo = video => {
   return {
     type: ADD_VIDEO,
-    payload: { ...video }
+    payload: {...video}
   };
 };
 
 export const setFormat = (video, format) => {
   return {
     type: ADD_VIDEO,
-    payload: { ...video, format, err: "" }
+    payload: {...video, format, err: ""}
   };
 };
 

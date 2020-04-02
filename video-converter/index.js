@@ -1,5 +1,6 @@
 const electron = require("electron");
 const ffmpeg = require("fluent-ffmpeg");
+const _ = require("lodash");
 
 const {app, BrowserWindow, ipcMain} = electron;
 
@@ -27,7 +28,7 @@ ipcMain.on("videos:add", (event, videos) => {
           resolve({
             ...video,
             duration: metadata.format.duration,
-            format:"avi"
+            format: "avi"
           });
       })
     });
@@ -36,3 +37,19 @@ ipcMain.on("videos:add", (event, videos) => {
     mainWindow.webContents.send("videos:metadata", data);
   });
 });
+
+ipcMain.on("videos:convert", ((event, videos) => {
+  _.each(videos, (video)=>{
+    console.log("video", video)
+    const outputDir = video.path.split(video.name)[0];
+    const outputName = video.name.split(".")[0];
+    const outputPath = `${outputDir}${outputName}.${video.format}`;
+
+    ffmpeg(video.path)
+      .output(outputPath)
+      .on("end", ()=>{
+        mainWindow.webContents.send("video:converted", {video, outputPath})
+      })
+      .run();
+  });
+}));
