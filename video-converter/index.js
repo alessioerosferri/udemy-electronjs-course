@@ -40,7 +40,6 @@ ipcMain.on("videos:add", (event, videos) => {
 
 ipcMain.on("videos:convert", ((event, videos) => {
   _.each(videos, (video) => {
-    console.log("video", video)
     const outputDir = video.path.split(video.name)[0];
     const outputName = video.name.split(".")[0];
     const outputPath = `${outputDir}${outputName}.${video.format}`;
