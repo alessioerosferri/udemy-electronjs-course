@@ -4,6 +4,7 @@ import _ from "lodash";
 let listenerHasBeenSet;
 
 export const addVideos = videos => dispatch => {
+  console.log("videos", videos);
   ipcRenderer.send("videos:add", videos);
   //using once instead of on to not resubscribes multiple times to the event
   ipcRenderer.once("videos:metadata", (event, videosWithData) => {
@@ -44,6 +45,14 @@ export const setFormat = (video, format) => {
   return {
     type: ADD_VIDEO,
     payload: {...video, format, err: ""}
+  };
+};
+
+export const setOrientation = (video, orientation) => {
+  console.log(orientation);
+  return {
+    type: ADD_VIDEO,
+    payload: {...video, orientation, err: ""}
   };
 };
 

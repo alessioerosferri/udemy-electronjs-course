@@ -14,6 +14,13 @@ const VIDEO_FORMATS = [
   {value: 'ogv', option: 'OGV'},
 ]
 
+const ORIENTATIONS = [
+  {value: 0, option: 'NORMAL'},
+  {value: 90, option: 'ORIENT TO THE LEFT'},
+  {value: 270, option: 'ORIENT TO THE RIGHT'},
+  {value: 180, option: 'INVERTED'}
+]
+
 class VideoList extends Component {
 
   showStatus({ complete, timemark, outputPath, err }) {
@@ -39,9 +46,24 @@ class VideoList extends Component {
     }
   }
 
+  renderOrientation(video){
+    const {name, complete, timemark, orientation} = video;
+    return (
+      <select
+        className={complete || timemark ? "hidden" : "browser-default right"}
+        value={orientation}
+        onChange={e => this.props.onOrientationChange(video, e.target.value)}
+      >
+        {ORIENTATIONS.map(outOrientation => (
+          <option key={outOrientation.value} value={outOrientation.value}>{outOrientation.option}</option>
+        ))}
+      </select>
+    );
+  }
+
   renderVideos() {
     return _.map(this.props.videos, video => {
-      const { name, path, duration, format, timemark, complete, outputPath, err } = video;
+      const { name, path, duration, format, orientation, timemark, complete, outputPath, err } = video;
       const formatedDuration = moment.duration(duration, 's').format("hh:mm:ss", {trim:false})
       return (
         <li className="collection-item avatar" key={path}>
@@ -52,15 +74,7 @@ class VideoList extends Component {
             <p>{formatedDuration}</p>
           </div>
           <div className="secondary-content" style={styles.secondaryContent}>
-            <select
-              className={complete || timemark ? "hidden" : "browser-default right"}
-              value={format}
-              onChange={e => this.props.onFormatChange(video, e.target.value)}
-            >
-              {VIDEO_FORMATS.map(outFormat => (
-                <option key={outFormat.value} value={outFormat.value}>{outFormat.option}</option>
-              ))}
-            </select>
+            {this.renderOrientation(video)}
             {this.showStatus({ complete, timemark, outputPath, err })}
           </div>
         </li>
