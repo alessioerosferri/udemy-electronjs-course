@@ -1,11 +1,22 @@
+const fixPath = require('fix-path');
+fixPath();
 const electron = require("electron");
 const ffmpeg = require("fluent-ffmpeg");
-ffmpeg.setFfprobePath(require('@ffprobe-installer/ffprobe').path);
-ffmpeg.setFfmpegPath(require('@ffmpeg-installer/ffmpeg').path);
+const path = require("path");
+const execSync = require('child_process').execSync;
 const _ = require("lodash");
 const {app, BrowserWindow, ipcMain, shell} = electron;
 const Jimp = require('jimp');
 const im = require("imagemagick");
+const Exif = require('exif-be-gone-ts/ExifBeGone').Exif;
+let convert, mogrify;
+
+if(process.platform == "win32"){
+  ffmpeg.setFfprobePath(path.join(__dirname, "src", "ffprobe.exe"));
+  ffmpeg.setFfmpegPath(path.join(__dirname, "src", "ffmpeg.exe"));
+  convert = path.join(__dirname, "src", "convert.exe");
+  mogrify = path.join(__dirname, "src", "mogrify.exe");
+}
 
 let mainWindow;
 
@@ -43,30 +54,28 @@ ipcMain.on("videos:add", (event, videos) => {
 });
 
 ipcMain.on("videos:convert", ((event, videos) => {
-  _.each(videos, (video) => {
+  _.each(videos, async (video) => {
     const outputDir = video.path.split(video.name)[0];
     const outputName = video.name.split(".")[0];
     const {orientation} = video;
     if(video.name.endsWith("jpg") || video.name.endsWith("png")){
       const outputPath = `${outputDir}${outputName}_output.jpg`;
-      im.convert([video.path, '-colorspace', 'yuv', outputPath],
-        function(err, stdout){
-          if (err) throw err;
-          Jimp.read(outputPath, (err, image) => {
-            if (err) throw err;
-            if(orientation){
-              image
-                .rotate(parseInt(orientation), Jimp.RESIZE_BEZIER, function(err){
-                  if (err) throw err;
-                })
-                .write(outputPath);
-            }
-            image
-              .quality(95)
-              .write(outputPath);
-            mainWindow.webContents.send("video:converted", {video, outputPath});
-          });
-        });
+      Exif.remove(video.path, outputPath);
+      await(new Promise(resolve => setTimeout(()=>{resolve()}, 1000)));
+      execSync(`${convert} ${outputPath} -colorspace RGB ${outputPath}`);
+      execSync(`${convert} ${outputPath} -colorspace yuv ${outputPath}`);
+      execSync(`${mogrify} ${outputPath} -quality 95 ${outputPath}`);
+      Jimp.read(outputPath, (err, image) => {
+        if (err) throw err;
+        if(orientation){
+          image
+            .rotate(parseInt(orientation), Jimp.RESIZE_BEZIER, function(err){
+              if (err) throw err;
+            })
+            .write(outputPath);
+        }
+        mainWindow.webContents.send("video:converted", {video, outputPath});
+      });
     } else {
       let videoFormat;
       switch (parseInt(orientation)) {

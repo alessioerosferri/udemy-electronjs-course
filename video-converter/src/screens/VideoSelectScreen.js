@@ -27,7 +27,7 @@ class VideoSelectScreen extends Component {
 
   renderChildren({ isDragActive, isDragReject }) {
     if (isDragActive) {
-      return <h4 className="drop-message">Omnomnom, let me have those videos!</h4>;
+      return <h4 className="drop-message">Omnomnom, let me have those files!</h4>;
     } else if (isDragReject) {
       return <h4 className="drop-message">Uh oh, I don't know how to deal with that type of file!</h4>;
     } else {
@@ -41,7 +41,7 @@ class VideoSelectScreen extends Component {
         <Dropzone
           onDrop={this.onDrop}
           multiple
-          accept=".png, .jpg, video/*"
+          accept="image/jpeg,image/png,video/*"
           className="dropzone"
           activeClassName="dropzone-active"
           rejectClassName="dropzone-reject"
